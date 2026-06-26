@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIGIL · Pharmacovigilance Case Orchestration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root[data-theme="light"] {
+      --paper: #FBFAF7;
+      --paper-2: #F3F1EA;
+      --card: #FFFFFF;
+      --ink: #15201B;
+      --ink-soft: #5A6660;
+      --line: #E4E1D8;
+      --green: #00C389;
+      --green-deep: #04996B;
+      --green-glow: #2BD9A8;
+      --amber: #C8841C;
+      --red: #C8453B;
+      --hero-grad: linear-gradient(135deg, #04996B 0%, #00C389 48%, #2BD9A8 100%);
+      --shadow: 0 1px 2px rgba(21, 32, 27, .04), 0 10px 30px rgba(21, 32, 27, .07);
+      --shadow-lg: 0 2px 10px rgba(21, 32, 27, .06), 0 30px 70px rgba(21, 32, 27, .12);
+      --glow: 0 0 0 1px rgba(0, 195, 137, .25), 0 0 30px rgba(43, 217, 168, .30);
+    }
+
+    :root[data-theme="dark"] {
+      --paper: #0C110F;
+      --paper-2: #121915;
+      --card: #141C18;
+      --ink: #EAF2EE;
+      --ink-soft: #8FA39A;
+      --line: #22302A;
+      --green: #15D998;
+      --green-deep: #15D998;
+      --green-glow: #46F0BC;
+      --amber: #E0A23C;
+      --red: #E5685C;
+      --hero-grad: linear-gradient(135deg, #022b1f 0%, #04996B 55%, #0d3a2c 100%);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 34px rgba(0, 0, 0, .5);
+      --shadow-lg: 0 2px 12px rgba(0, 0, 0, .5), 0 34px 80px rgba(0, 0, 0, .6);
+      --glow: 0 0 0 1px rgba(21, 217, 152, .35), 0 0 34px rgba(70, 240, 188, .30);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      transition: background .4s, color .4s
+    }
+
+    ::selection {
+      background: var(--green-glow);
+      color: #04231a
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 28px
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    header.top {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: color-mix(in srgb, var(--paper) 82%, transparent);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line)
+    }
+
+    .top-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 66px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer
+    }
+
+    .mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--ink);
+      display: grid;
+      place-items: center;
+      flex: none;
+      position: relative
+    }
+
+    .mark::before {
+      content: "";
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 25%, transparent), 0 0 14px 2px var(--green-glow);
+      animation: pulse 2.6s ease-in-out infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .brand b {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      letter-spacing: .14em;
+      font-size: 15px
+    }
+
+    .brand span {
+      font-size: 10.5px;
+      color: var(--ink-soft);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      display: block;
+      margin-top: -2px
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .nav-link {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      letter-spacing: .04em;
+      color: var(--ink-soft);
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: .15s
+    }
+
+    .nav-link:hover {
+      color: var(--ink);
+      background: var(--paper-2)
+    }
+
+    .nav-link svg {
+      width: 14px;
+      height: 14px
+    }
+
+    @media(max-width:760px) {
+      .nav-link span {
+        display: none
+      }
+    }
+
+    .nav-cta {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 13px;
+      color: #04231a;
+      background: var(--green);
+      padding: 9px 16px;
+      border-radius: 9px;
+      transition: .15s;
+      border: none;
+      cursor: pointer
+    }
+
+    .nav-cta:hover {
+      box-shadow: var(--glow);
+      transform: translateY(-1px)
+    }
+
+    @media(max-width:600px) {
+      .nav-cta {
+        display: none
+      }
+    }
+
+    .toggle {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--ink-soft);
+      transition: .15s
+    }
+
+    .toggle:hover {
+      color: var(--green-deep);
+      border-color: var(--green)
+    }
+
+    .toggle svg {
+      width: 17px;
+      height: 17px
+    }
+
+    .page {
+      display: none
+    }
+
+    .page.active {
+      display: block;
+      animation: fade .5s ease
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--hero-grad)
+    }
+
+    .hero-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 78% 20%, rgba(255, 255, 255, .22), transparent 42%), radial-gradient(circle at 12% 88%, rgba(0, 0, 0, .18), transparent 50%)
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      opacity: .10;
+      background-image: linear-gradient(rgba(255, 255, 255, .5) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .5) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000, transparent)
+    }
+
+    .hero-cross {
+      position: absolute;
+      right: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: 430px;
+      line-height: 1;
+      color: rgba(255, 255, 255, .07);
+      user-select: none;
+      pointer-events: none
+    }
+
+    @media(max-width:700px) {
+      .hero-cross {
+        font-size: 240px;
+        right: -20px
+      }
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      padding: 96px 0 104px;
+      color: #fff
+    }
+
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, .85);
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 22px
+    }
+
+    .hero-eyebrow::before {
+      content: "";
+      width: 30px;
+      height: 1px;
+      background: rgba(255, 255, 255, .7)
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: clamp(40px, 6.4vw, 76px);
+      line-height: 1.01;
+      letter-spacing: -.025em;
+      max-width: 15ch;
+      text-shadow: 0 2px 30px rgba(0, 0, 0, .18)
+    }
+
+    .hero .sub {
+      margin-top: 24px;
+      font-size: 19px;
+      max-width: 54ch;
+      color: rgba(255, 255, 255, .92)
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      margin-top: 38px;
+      flex-wrap: wrap
+    }
+
+    .btn-primary {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 15px;
+      color: #04231a;
+      background: #fff;
+      padding: 14px 26px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      border: none;
+      transition: .16s
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, .25)
+    }
+
+    .btn-primary::after {
+      content: "→";
+      font-size: 17px
+    }
+
+    .btn-ghost {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .4);
+      padding: 14px 24px;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: .16s;
+      backdrop-filter: blur(4px)
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, .22)
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 42px;
+      margin-top: 56px;
+      flex-wrap: wrap
+    }
+
+    .hero-stats div .k {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: 30px;
+      line-height: 1
+    }
+
+    .hero-stats div .l {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, .8);
+      margin-top: 6px;
+      display: block
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .7s, transform .7s
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: none
+    }
+
+    .oneliner {
+      padding: 84px 0;
+      text-align: center;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .oneliner .lbl {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--green-deep);
+      margin-bottom: 20px
+    }
+
+    .oneliner h2 {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: clamp(24px, 3.6vw, 38px);
+      line-height: 1.22;
+      letter-spacing: -.015em;
+      max-width: 24ch;
+      margin: 0 auto
+    }
+
+    .oneliner h2 em {
+      font-style: normal;
+      color: var(--green-deep)
+    }
+
+    .section {
+      padding: 84px 0;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .sec-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 46px;
+      gap: 24px;
+      flex-wrap: wrap
+    }
+
+    .sec-head .eyebrow {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--green-deep);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .sec-head .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--green)
+    }
+
+    .sec-head h3 {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: clamp(26px, 3.4vw, 40px);
+      letter-spacing: -.02em;
+      line-height: 1.06;
+      max-width: 18ch
+    }
+
+    .sec-head p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      max-width: 40ch
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px
+    }
+
+    @media(max-width:880px) {
+      .cards {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      transition: .25s;
+      position: relative;
+      overflow: hidden
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: color-mix(in srgb, var(--green) 50%, var(--line))
+    }
+
+    .card .ci {
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
+      background: color-mix(in srgb, var(--green) 14%, transparent);
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      color: var(--green-deep)
+    }
+
+    .card .ci svg {
+      width: 22px;
+      height: 22px
+    }
+
+    .card .step {
+      position: absolute;
+      top: 20px;
+      right: 22px;
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      color: var(--ink-soft);
+      letter-spacing: .08em
+    }
+
+    .card h4 {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 18px;
+      margin-bottom: 8px
+    }
+
+    .card p {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.55
+    }
+
+    .band {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 46px;
+      align-items: center
+    }
+
+    @media(max-width:880px) {
+      .band {
+        grid-template-columns: 1fr;
+        gap: 30px
+      }
+    }
+
+    .band-media {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      aspect-ratio: 4/3;
+      background: var(--hero-grad)
+    }
+
+    .band-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .band-media .scene {
+      width: 100%;
+      height: 100%;
+      display: block
+    }
+
+    .band-media .ov {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--green-deep) 55%, transparent))
+    }
+
+    .band-media .tag {
+      position: absolute;
+      left: 18px;
+      bottom: 16px;
+      z-index: 2;
+      color: #fff;
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, .3);
+      padding: 6px 11px;
+      border-radius: 7px;
+      backdrop-filter: blur(4px)
+    }
+
+    .band-text .eyebrow {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--green-deep);
+      margin-bottom: 14px
+    }
+
+    .band-text h3 {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: clamp(24px, 3vw, 34px);
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      margin-bottom: 16px
+    }
+
+    .band-text p {
+      color: var(--ink-soft);
+      font-size: 15.5px;
+      margin-bottom: 14px;
+      line-height: 1.6
+    }
+
+    .band-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      margin-top: 6px
+    }
+
+    .band-list li {
+      display: flex;
+      gap: 12px;
+      font-size: 14.5px;
+      align-items: flex-start
+    }
+
+    .band-list li::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green-glow);
+      margin-top: 7px;
+      flex: none
+    }
+
+    .strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px
+    }
+
+    @media(max-width:700px) {
+      .strip {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .hl {
+      border-radius: 16px;
+      padding: 26px;
+      border: 1px solid;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start
+    }
+
+    .hl.clock {
+      background: color-mix(in srgb, var(--green) 7%, var(--card));
+      border-color: color-mix(in srgb, var(--green) 38%, var(--line))
+    }
+
+    .hl.exc {
+      background: color-mix(in srgb, var(--red) 6%, var(--card));
+      border-color: color-mix(in srgb, var(--red) 32%, var(--line))
+    }
+
+    .hl .hi {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      flex: none
+    }
+
+    .hl.clock .hi {
+      background: color-mix(in srgb, var(--green) 16%, transparent);
+      color: var(--green-deep)
+    }
+
+    .hl.exc .hi {
+      background: color-mix(in srgb, var(--red) 14%, transparent);
+      color: var(--red)
+    }
+
+    .hl .hi svg {
+      width: 21px;
+      height: 21px
+    }
+
+    .hl h4 {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 6px
+    }
+
+    .hl p {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.55
+    }
+
+    .cta-final {
+      padding: 90px 0;
+      text-align: center
+    }
+
+    .cta-final h2 {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing: -.02em;
+      line-height: 1.08;
+      max-width: 20ch;
+      margin: 0 auto 28px
+    }
+
+    .cta-final h2 em {
+      font-style: normal;
+      color: var(--green-deep)
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 34px 0;
+      background: var(--paper-2)
+    }
+
+    .foot-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px
+    }
+
+    .foot-inner p {
+      font-family: 'JetBrains Mono';
+      font-size: 11.5px;
+      color: var(--ink-soft)
+    }
+
+    .foot-links {
+      display: flex;
+      gap: 20px
+    }
+
+    .foot-links a {
+      font-family: 'JetBrains Mono';
+      font-size: 11.5px;
+      color: var(--ink-soft);
+      transition: .15s
+    }
+
+    .foot-links a:hover {
+      color: var(--green-deep)
+    }
+
+    /* dashboard */
+    .dash-hero {
+      padding: 46px 0 6px
+    }
+
+    .dash-hero .eyebrow {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--green-deep);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .dash-hero .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--green)
+    }
+
+    .dash-hero h1 {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: clamp(30px, 4.4vw, 46px);
+      letter-spacing: -.02em;
+      line-height: 1.05;
+      max-width: 18ch
+    }
+
+    .dash-hero h1 .accent {
+      color: var(--green-deep)
+    }
+
+    .dash-hero p {
+      margin-top: 16px;
+      max-width: 58ch;
+      color: var(--ink-soft);
+      font-size: 16px
+    }
+
+    .back-link {
+      font-family: 'JetBrains Mono';
+      font-size: 12px;
+      color: var(--ink-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: .15s
+    }
+
+    .back-link:hover {
+      color: var(--green-deep)
+    }
+
+    .station {
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 24px;
+      padding: 26px 0 90px;
+      align-items: start
+    }
+
+    @media(max-width:940px) {
+      .station {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper-2)
+    }
+
+    .panel-head h2 {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 15px
+    }
+
+    .panel-head .idx {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      color: var(--ink-soft);
+      letter-spacing: .1em
+    }
+
+    .panel-body {
+      padding: 22px
+    }
+
+    .prompt-box {
+      background: color-mix(in srgb, var(--green) 8%, var(--card));
+      border: 1px solid color-mix(in srgb, var(--green) 42%, var(--line));
+      border-radius: 13px;
+      padding: 16px 18px;
+      margin-bottom: 22px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      box-shadow: var(--glow)
+    }
+
+    .prompt-box .pi {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--green);
+      display: grid;
+      place-items: center;
+      flex: none;
+      box-shadow: 0 0 16px color-mix(in srgb, var(--green-glow) 70%, transparent)
+    }
+
+    .prompt-box .pi svg {
+      width: 18px;
+      height: 18px;
+      color: #04231a
+    }
+
+    .prompt-box p {
+      font-size: 13.5px;
+      color: var(--ink);
+      line-height: 1.5
+    }
+
+    .prompt-box p b {
+      font-family: 'Space Grotesk';
+      color: var(--green-deep)
+    }
+
+    .field {
+      margin-bottom: 18px
+    }
+
+    .field:last-child {
+      margin-bottom: 0
+    }
+
+    label.fl {
+      display: block;
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 7px
+    }
+
+    input[type=text],
+    input[type=number],
+    select {
+      width: 100%;
+      font-family: 'Inter';
+      font-size: 14.5px;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 13px;
+      transition: .15s
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 16%, transparent)
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    @media(max-width:520px) {
+      .row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .seg {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .seg button {
+      font-family: 'Inter';
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-soft);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: .14s;
+      flex: 1;
+      min-width: fit-content
+    }
+
+    .seg button:hover {
+      border-color: var(--green);
+      color: var(--ink)
+    }
+
+    .seg button[aria-pressed=true] {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink)
+    }
+
+    .assess {
+      width: 100%;
+      margin-top: 6px;
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 15px;
+      color: #04231a;
+      background: var(--green);
+      border: none;
+      border-radius: 11px;
+      padding: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: .14s
+    }
+
+    .assess:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--glow)
+    }
+
+    .assess svg {
+      width: 16px;
+      height: 16px
+    }
+
+    .empty {
+      padding: 56px 30px;
+      text-align: center;
+      color: var(--ink-soft)
+    }
+
+    .empty .ring {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      border: 2px dashed var(--line);
+      display: grid;
+      place-items: center
+    }
+
+    .empty .ring::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--paper-2)
+    }
+
+    .empty h3 {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 6px
+    }
+
+    .empty p {
+      font-size: 13.5px;
+      max-width: 34ch;
+      margin: 0 auto
+    }
+
+    .verdict {
+      padding: 26px 22px;
+      display: none
+    }
+
+    .verdict.show {
+      display: block;
+      animation: rise .5s cubic-bezier(.2, .7, .2, 1)
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .gauge-wrap {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin-bottom: 24px
+    }
+
+    .gauge {
+      position: relative;
+      width: 128px;
+      height: 128px;
+      flex: none
+    }
+
+    .gauge svg {
+      transform: rotate(-90deg)
+    }
+
+    .gauge .num {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center
+    }
+
+    .gauge .num b {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: 30px;
+      line-height: 1;
+      color: var(--ink)
+    }
+
+    .gauge .num small {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      letter-spacing: .1em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      margin-top: 3px
+    }
+
+    .verdict-label .cat {
+      font-family: 'Space Grotesk';
+      font-weight: 700;
+      font-size: 27px;
+      letter-spacing: -.01em;
+      line-height: 1.1
+    }
+
+    .verdict-label .who {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      letter-spacing: .08em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      margin-top: 4px
+    }
+
+    .pills {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap
+    }
+
+    .pill {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 12px 15px;
+      border-radius: 11px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      flex: 1;
+      min-width: 120px
+    }
+
+    .pill .pl {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--ink-soft)
+    }
+
+    .pill .pv {
+      font-family: 'Space Grotesk';
+      font-weight: 600;
+      font-size: 16px
+    }
+
+    .pill.is-serious {
+      border-color: color-mix(in srgb, var(--red) 40%, var(--line));
+      background: color-mix(in srgb, var(--red) 6%, var(--card))
+    }
+
+    .pill.is-serious .pv {
+      color: var(--red)
+    }
+
+    .pill.is-green {
+      border-color: color-mix(in srgb, var(--green) 45%, var(--line));
+      background: color-mix(in srgb, var(--green) 7%, var(--card))
+    }
+
+    .pill.is-green .pv {
+      color: var(--green-deep)
+    }
+
+    .reason {
+      border-left: 2px solid var(--green);
+      padding: 2px 0 2px 16px;
+      margin-bottom: 20px
+    }
+
+    .reason .rl {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 5px
+    }
+
+    .reason p {
+      font-size: 14.5px;
+      color: var(--ink);
+      line-height: 1.55
+    }
+
+    .route {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 11px;
+      font-size: 13.5px
+    }
+
+    .route.expedite {
+      background: color-mix(in srgb, var(--red) 6%, var(--card));
+      border: 1px solid color-mix(in srgb, var(--red) 30%, var(--line))
+    }
+
+    .route.normal {
+      background: color-mix(in srgb, var(--green) 6%, var(--card));
+      border: 1px solid color-mix(in srgb, var(--green) 30%, var(--line))
+    }
+
+    .route .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex: none
+    }
+
+    .route.expedite .dot {
+      background: var(--red);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--red) 60%, transparent)
+    }
+
+    .route.normal .dot {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green-glow)
+    }
+
+    .route b {
+      font-family: 'Space Grotesk';
+      font-weight: 600
+    }
+
+    .route span {
+      color: var(--ink-soft)
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <div class="brand" onclick="go('home')">
+        <div class="mark"></div>
+        <div><b>VIGIL</b><span>Pharmacovigilance</span></div>
+      </div>
+      <div class="nav-right">
+        <a class="nav-link" href="https://cloud.uipath.com/kinnoski/studio_" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7h16M4 12h16M4 17h10" />
+          </svg><span>UiPath Studio</span></a>
+        <a class="nav-link" href="https://github.com/0xkinno/vigil" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.81c0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z" />
+          </svg><span>GitHub</span></a>
+        <button class="toggle" id="themeBtn" aria-label="Toggle theme"></button>
+        <button class="nav-cta" onclick="go('dash')">Open workstation</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <main id="home" class="page active">
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-cross">+</div>
+      <div class="wrap hero-inner">
+        <div class="hero-eyebrow">UiPath Maestro Case · Track 1</div>
+        <h1>Drug safety, governed by the clock.</h1>
+        <p class="sub">Every adverse-event report becomes a long-running case that carries its own regulatory deadline,
+          escalates the moment a patient turns serious, and refuses to close without a physician's sign-off.</p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="go('dash')">Open the workstation</button>
+          <a class="btn-ghost" href="https://github.com/0xkinno/vigil" target="_blank" rel="noopener">View on GitHub</a>
+        </div>
+        <div class="hero-stats">
+          <div><span class="k">5</span><span class="l">orchestrated agents</span></div>
+          <div><span class="k">15-day</span><span class="l">regulatory SLA clock</span></div>
+          <div><span class="k">1</span><span class="l">mandatory human gate</span></div>
+          <div><span class="k">+2</span><span class="l">coding-agent bonus</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="oneliner reveal">
+      <div class="wrap">
+        <div class="lbl">The one thing to know</div>
+        <h2>When a patient is harmed, a legal clock starts. VIGIL makes that deadline a <em>property of the case</em> —
+          not a reminder someone has to remember.</h2>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <div>
+            <div class="eyebrow">How it works</div>
+            <h3>One report, five governed stages</h3>
+          </div>
+          <p>Each adverse-event report flows through a stage-based case, with agents doing the work and a physician
+            accountable for the serious call.</p>
+        </div>
+        <div class="cards">
+          <div class="card reveal"><span class="step">01</span>
+            <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16v16H4z" />
+                <path d="M8 9h8M8 13h5" />
+              </svg></div>
+            <h4>Intake</h4>
+            <p>Extracts the four ICH E2B core elements from the raw report and validates completeness.</p>
+          </div>
+          <div class="card reveal"><span class="step">02</span>
+            <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v6l4 2" />
+                <circle cx="12" cy="14" r="8" />
+              </svg></div>
+            <h4>Triage</h4>
+            <p>Assesses seriousness against ICH criteria and assigns the 7- or 15-day reporting deadline.</p>
+          </div>
+          <div class="card reveal"><span class="step">03</span>
+            <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21v-1a6 6 0 0 1 12 0v1" />
+                <path d="m16 11 2 2 4-4" />
+              </svg></div>
+            <h4>Medical Review</h4>
+            <p>A physician records the decision — approve, request information, or reject. The case cannot pass without
+              it.</p>
+          </div>
+          <div class="card reveal"><span class="step">04</span>
+            <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2h9l5 5v15H6z" />
+                <path d="M14 2v6h6M9 14h6M9 17h4" />
+              </svg></div>
+            <h4>Reporting</h4>
+            <p>Generates the ICH E2B submission summary and identifies the regulators to notify — FDA, EMA, and beyond.
+            </p>
+          </div>
+          <div class="card reveal"><span class="step">05</span>
+            <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m5 12 5 5 9-11" />
+              </svg></div>
+            <h4>Closure</h4>
+            <p>Verifies completion, produces the full audit record, and closes the case for inspection.</p>
+          </div>
+          <div class="card reveal" style="background:var(--hero-grad);color:#fff;border:none"><span class="step"
+              style="color:rgba(255,255,255,.85)">⚡</span>
+            <div class="ci" style="background:rgba(255,255,255,.18);color:#fff"><svg viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+              </svg></div>
+            <h4 style="color:#fff">Expedited Escalation</h4>
+            <p style="color:rgba(255,255,255,.9)">When a case turns serious, an interrupting exception path pulls it out
+              of the normal flow onto the urgent track.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap band">
+        <div class="band-media reveal">
+          <svg class="scene" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"
+            xmlns="http://www.w3.org/2000/svg" aria-label="Clinical care environment">
+            <defs>
+              <linearGradient id="cl-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#EAFBF4" />
+                <stop offset="1" stop-color="#D4F4E7" />
+              </linearGradient>
+              <linearGradient id="cl-floor" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#CFEFE0" />
+                <stop offset="1" stop-color="#BCE7D2" />
+              </linearGradient>
+            </defs>
+            <rect width="800" height="600" fill="url(#cl-sky)" />
+            <rect y="430" width="800" height="170" fill="url(#cl-floor)" />
+            <!-- window light -->
+            <rect x="40" y="60" width="180" height="240" rx="8" fill="#fff" opacity=".55" />
+            <line x1="130" y1="60" x2="130" y2="300" stroke="#9FD9C1" stroke-width="3" />
+            <line x1="40" y1="180" x2="220" y2="180" stroke="#9FD9C1" stroke-width="3" />
+            <!-- hospital bed -->
+            <rect x="120" y="360" width="360" height="22" rx="8" fill="#fff" />
+            <rect x="120" y="382" width="36" height="80" rx="6" fill="#fff" />
+            <rect x="444" y="382" width="36" height="80" rx="6" fill="#fff" />
+            <rect x="130" y="340" width="120" height="34" rx="12" fill="#EAF2EE" stroke="#04996B" stroke-width="2" />
+            <rect x="250" y="346" width="220" height="20" rx="10" fill="#D4F4E7" />
+            <!-- monitor pole -->
+            <rect x="520" y="220" width="6" height="250" fill="#9FD9C1" />
+            <rect x="500" y="190" width="120" height="84" rx="10" fill="#15201B" />
+            <polyline points="512,235 528,235 536,212 548,256 560,232 572,232 596,232" fill="none" stroke="#2BD9A8"
+              stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="612" cy="206" r="5" fill="#2BD9A8" />
+            <!-- caregiver (stylized, faceless) -->
+            <g>
+              <ellipse cx="330" cy="300" rx="34" ry="38" fill="#04996B" />
+              <rect x="300" y="330" width="60" height="96" rx="22" fill="#00C389" />
+              <circle cx="330" cy="262" r="26" fill="#F2D9C0" />
+              <path d="M306,256 a24,24 0 0 1 48,0 v6 h-48 z" fill="#15201B" />
+              <rect x="322" y="356" width="16" height="16" rx="3" fill="#fff" />
+              <path d="M330 360 v8 M326 364 h8" stroke="#00C389" stroke-width="2.4" />
+            </g>
+            <!-- cross emblem -->
+            <g transform="translate(660,420)" opacity=".9">
+              <circle r="40" fill="#fff" />
+              <path d="M-6,-22 h12 v16 h16 v12 h-16 v16 h-12 v-16 h-16 v-12 h16 z" fill="#00C389" />
+            </g>
+          </svg>
+          <div class="ov"></div>
+          <div class="tag">Patient safety · regulated reporting</div>
+        </div>
+        <div class="band-text reveal">
+          <div class="eyebrow">Why it matters</div>
+          <h3>A missed deadline is a reportable failure.</h3>
+          <p>Pharmacovigilance is a legal obligation for every pharmaceutical company on earth. Serious adverse events
+            must be assessed, signed off, and filed within a fixed window — as little as seven days.</p>
+          <ul class="band-list">
+            <li>The deadline rides on the case from intake to closure, warning before it breaches.</li>
+            <li>Reclassification to serious triggers an immediate, interrupting escalation.</li>
+            <li>Every transition is recorded — an audit trail ready for inspection.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <div>
+            <div class="eyebrow">Governance, by architecture</div>
+            <h3>Two features that carry the weight</h3>
+          </div>
+        </div>
+        <div class="strip">
+          <div class="hl clock reveal">
+            <div class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg></div>
+            <div>
+              <h4>The regulatory SLA clock</h4>
+              <p>A 15-day case-wide deadline that warns the team at 80% — with roughly three days of runway — and
+                escalates the instant it breaches.</p>
+            </div>
+          </div>
+          <div class="hl exc reveal">
+            <div class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+              </svg></div>
+            <div>
+              <h4>The interrupting exception</h4>
+              <p>A secondary stage that fires the moment a case is flagged serious, interrupting active work and routing
+                it to the expedited path.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap band">
+        <div class="band-text reveal">
+          <div class="eyebrow">Coded × low-code</div>
+          <h3>A coding agent built the brain that drives the routing.</h3>
+          <p>The causality service is coded Python — built through a coding agent connected to UiPath's official
+            integration — that computes WHO-UMC causality and outputs the seriousness value the Maestro case uses to
+            escalate.</p>
+          <ul class="band-list">
+            <li>WHO-UMC causality across six categories, deterministic and testable.</li>
+            <li>ICH E2D seriousness and the binding 7 / 15 / 90-day deadline.</li>
+            <li>Ten of ten self-tests passing — verifiable from the source alone.</li>
+          </ul>
+        </div>
+        <div class="band-media reveal">
+          <svg class="scene" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"
+            xmlns="http://www.w3.org/2000/svg" aria-label="Laboratory analysis">
+            <defs>
+              <linearGradient id="lb-bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#0C110F" />
+                <stop offset="1" stop-color="#10261E" />
+              </linearGradient>
+              <linearGradient id="lb-liq" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2BD9A8" />
+                <stop offset="1" stop-color="#04996B" />
+              </linearGradient>
+            </defs>
+            <rect width="800" height="600" fill="url(#lb-bg)" />
+            <!-- grid -->
+            <g stroke="#15D998" stroke-opacity=".12" stroke-width="1">
+              <line x1="0" y1="150" x2="800" y2="150" />
+              <line x1="0" y1="300" x2="800" y2="300" />
+              <line x1="0" y1="450" x2="800" y2="450" />
+              <line x1="200" y1="0" x2="200" y2="600" />
+              <line x1="400" y1="0" x2="400" y2="600" />
+              <line x1="600" y1="0" x2="600" y2="600" />
+            </g>
+            <!-- molecule -->
+            <g stroke="#46F0BC" stroke-width="2.5" fill="#0C110F">
+              <line x1="250" y1="150" x2="330" y2="110" />
+              <line x1="330" y1="110" x2="410" y2="150" />
+              <line x1="410" y1="150" x2="410" y2="230" />
+              <line x1="410" y1="230" x2="330" y2="270" />
+              <line x1="330" y1="270" x2="250" y2="230" />
+              <line x1="250" y1="230" x2="250" y2="150" />
+              <line x1="410" y1="150" x2="490" y2="120" />
+              <line x1="330" y1="270" x2="350" y2="350" />
+              <circle cx="250" cy="150" r="11" fill="#15D998" />
+              <circle cx="330" cy="110" r="11" fill="#46F0BC" />
+              <circle cx="410" cy="150" r="11" fill="#15D998" />
+              <circle cx="410" cy="230" r="11" fill="#46F0BC" />
+              <circle cx="330" cy="270" r="11" fill="#15D998" />
+              <circle cx="250" cy="230" r="11" fill="#46F0BC" />
+              <circle cx="490" cy="120" r="9" fill="#2BD9A8" />
+              <circle cx="350" cy="350" r="9" fill="#2BD9A8" />
+            </g>
+            <!-- flasks -->
+            <g>
+              <path d="M540 360 l0 50 -44 90 a18 18 0 0 0 16 26 l72 0 a18 18 0 0 0 16 -26 l-44 -90 0 -50 z" fill="none"
+                stroke="#8FA39A" stroke-width="3" />
+              <path d="M512 470 l60 0 22 46 a18 18 0 0 1 -16 26 l-72 0 a18 18 0 0 1 -16 -26 z" fill="url(#lb-liq)"
+                opacity=".85" />
+              <rect x="536" y="346" width="48" height="16" rx="4" fill="#8FA39A" />
+              <circle cx="540" cy="500" r="5" fill="#46F0BC" opacity=".8" />
+              <circle cx="560" cy="486" r="4" fill="#46F0BC" opacity=".7" />
+            </g>
+            <g>
+              <rect x="640" y="380" width="40" height="150" rx="10" fill="none" stroke="#8FA39A" stroke-width="3" />
+              <rect x="643" y="460" width="34" height="67" rx="6" fill="url(#lb-liq)" opacity=".8" />
+              <rect x="636" y="372" width="48" height="12" rx="4" fill="#8FA39A" />
+            </g>
+            <!-- readout chip -->
+            <g transform="translate(120,420)">
+              <rect width="220" height="120" rx="12" fill="#141C18" stroke="#22302A" stroke-width="2" />
+              <text x="18" y="36" font-family="'JetBrains Mono',monospace" font-size="15"
+                fill="#8FA39A">causality</text>
+              <text x="18" y="66" font-family="'Space Grotesk',sans-serif" font-size="26" font-weight="700"
+                fill="#15D998">Probable</text>
+              <text x="18" y="96" font-family="'JetBrains Mono',monospace" font-size="13" fill="#8FA39A">serious ·
+                15-day</text>
+              <circle cx="196" cy="30" r="6" fill="#15D998" />
+            </g>
+          </svg>
+          <div class="ov"></div>
+          <div class="tag">WHO-UMC · ICH E2D</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <div class="wrap reveal">
+        <h2>Try the assessment that drives the case. <em>Score a real adverse event.</em></h2>
+        <button class="btn-primary" style="margin:0 auto;color:#fff;background:var(--ink)" onclick="go('dash')">Open the
+          workstation</button>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap foot-inner">
+        <p>VIGIL · UiPath AgentHack 2026 · Track 1 Maestro Case</p>
+        <div class="foot-links">
+          <a href="https://cloud.uipath.com/kinnoski/studio_" target="_blank" rel="noopener">UiPath Studio</a>
+          <a href="https://github.com/0xkinno/vigil" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- DASHBOARD -->
+  <main id="dash" class="page">
+    <section class="wrap dash-hero">
+      <div class="back-link" onclick="go('home')">← Back to overview</div>
+      <div class="eyebrow">Causality Workstation</div>
+      <h1>Score causality. Flag seriousness. <span class="accent">Set the clock.</span></h1>
+      <p>The same coded logic that drives the Maestro case's escalation routing — run it directly on a single
+        adverse-event report.</p>
+    </section>
+
+    <section class="wrap station">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Adverse Event Report</h2><span class="idx">INPUT</span>
+        </div>
+        <div class="panel-body">
+          <div class="prompt-box">
+            <div class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 5v14M5 12h14" />
+              </svg></div>
+            <p>Enter an adverse drug event below. VIGIL returns its <b>WHO-UMC causality</b>, its <b>ICH E2D
+                seriousness</b>, and the binding <b>reporting deadline</b> — instantly, on-device.</p>
+          </div>
+          <div class="row">
+            <div class="field"><label class="fl" for="drug">Suspect drug</label><input type="text" id="drug"
+                value="Abacavir" /></div>
+            <div class="field"><label class="fl" for="event">Adverse event</label><input type="text" id="event"
+                value="DRESS syndrome" /></div>
+          </div>
+          <div class="field"><label class="fl" for="onset">Onset — days after drug started</label><input type="number"
+              id="onset" value="21" /></div>
+          <div class="field">
+            <label class="fl">Dechallenge — did the event abate when the drug stopped?</label>
+            <div class="seg" id="dechallenge" data-val="positive">
+              <button data-v="positive" aria-pressed="true">Positive</button>
+              <button data-v="negative" aria-pressed="false">Negative</button>
+              <button data-v="unknown" aria-pressed="false">Unknown</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="fl">Rechallenge — did it return when the drug was re-given?</label>
+            <div class="seg" id="rechallenge" data-val="none">
+              <button data-v="positive" aria-pressed="false">Positive</button>
+              <button data-v="negative" aria-pressed="false">Negative</button>
+              <button data-v="none" aria-pressed="true">Not done</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="fl">Alternative cause present?</label>
+            <div class="seg" id="altcause" data-val="no">
+              <button data-v="no" aria-pressed="true">No</button>
+              <button data-v="yes" aria-pressed="false">Yes</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="fl" for="outcome">Outcome</label>
+            <select id="outcome">
+              <option value="hospitalization">Hospitalization</option>
+              <option value="death">Death</option>
+              <option value="life-threatening">Life-threatening</option>
+              <option value="disability">Disability</option>
+              <option value="congenital-anomaly">Congenital anomaly</option>
+              <option value="other">Other / non-serious</option>
+            </select>
+          </div>
+          <button class="assess" id="assessBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.2">
+              <path d="m5 12 5 5 9-11" />
+            </svg>Assess case</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Assessment</h2><span class="idx" id="resIdx">AWAITING INPUT</span>
+        </div>
+        <div class="empty" id="emptyState">
+          <div class="ring"></div>
+          <h3>No case assessed yet</h3>
+          <p>Complete the report and select <b>Assess case</b> to compute causality, seriousness, and the reporting
+            deadline.</p>
+        </div>
+        <div class="verdict" id="verdict">
+          <div class="gauge-wrap">
+            <div class="gauge">
+              <svg width="128" height="128" viewBox="0 0 128 128">
+                <circle cx="64" cy="64" r="56" fill="none" stroke="var(--line)" stroke-width="10" />
+                <circle id="gaugeArc" cx="64" cy="64" r="56" fill="none" stroke="url(#g)" stroke-width="10"
+                  stroke-linecap="round" stroke-dasharray="351.8" stroke-dashoffset="351.8" />
+                <defs>
+                  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#00C389" />
+                    <stop offset="1" stop-color="#2BD9A8" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="num"><b id="gaugeNum">0</b><small>confidence</small></div>
+            </div>
+            <div class="verdict-label">
+              <div class="cat" id="catLabel">—</div>
+              <div class="who">WHO-UMC causality category</div>
+            </div>
+          </div>
+          <div class="pills">
+            <div class="pill" id="pillSerious"><span class="pl">Seriousness</span><span class="pv"
+                id="seriousVal">—</span></div>
+            <div class="pill" id="pillDeadline"><span class="pl">Reporting deadline</span><span class="pv"
+                id="deadlineVal">—</span></div>
+          </div>
+          <div class="reason">
+            <div class="rl">Causality rationale</div>
+            <p id="reasonText">—</p>
+          </div>
+          <div class="route" id="routeBox"><span class="dot"></span>
+            <div><b id="routeTitle">—</b> <span id="routeSub"></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function go(p) {
+      document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+      document.getElementById(p === 'dash' ? 'dash' : 'home').classList.add('active');
+      window.scrollTo(0, 0);
+      if (p === 'home') setTimeout(initReveal, 40);
+    }
+    const sun = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5 3.5 3.5M20.5 20.5 19 19M5 19l-1.5 1.5M20.5 3.5 19 5"/></svg>';
+    const moon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+    const root = document.documentElement, tb = document.getElementById('themeBtn');
+    function setTheme(t) { root.setAttribute('data-theme', t); tb.innerHTML = t === 'light' ? moon : sun; }
+    setTheme('light');
+    tb.addEventListener('click', () => setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'));
+
+    function initReveal() {
+      const els = document.querySelectorAll('#home .reveal');
+      const io = new IntersectionObserver((es) => { es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }) }, { threshold: .12 });
+      els.forEach(el => { el.classList.remove('in'); io.observe(el); });
+    }
+    initReveal();
+
+    document.querySelectorAll('.seg').forEach(seg => {
+      seg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', 'true'); seg.dataset.val = b.dataset.v; });
+    });
+
+    function assess(r) {
+      const plausible = r.onsetDaysAfterDrug >= 0; let causality, reason;
+      if (!plausible) { causality = "Unlikely"; reason = "Time relationship is implausible (event preceded drug exposure), making a causal link unlikely."; }
+      else if (r.dechallenge === "unknown" && r.rechallenge === "none") { causality = "Conditional"; reason = "Time relationship is plausible, but dechallenge is unknown and no rechallenge was performed — more data is needed to classify."; }
+      else if (r.dechallenge === "positive" && r.rechallenge === "positive" && !r.alternativeCause) { causality = "Certain"; reason = "Plausible time to onset, positive dechallenge, positive rechallenge, and no alternative explanation satisfy all WHO-UMC criteria for a certain association."; }
+      else if (r.dechallenge === "positive" && !r.alternativeCause) { causality = "Probable"; reason = "Plausible time to onset (" + r.onsetDaysAfterDrug + " days), positive dechallenge, and no alternative explanation, without a positive rechallenge."; }
+      else if (r.alternativeCause || r.dechallenge === "unknown") { causality = "Possible"; reason = "Plausible time to onset, but an alternative cause is present or dechallenge is unclear, supporting only a possible association."; }
+      else if (r.dechallenge === "negative" && r.alternativeCause) { causality = "Unlikely"; reason = "Negative dechallenge together with a credible alternative cause makes a drug-related association unlikely."; }
+      else { causality = "Possible"; reason = "The available evidence supports a possible association pending further information."; }
+      const sset = ["death", "life-threatening", "hospitalization", "disability", "congenital-anomaly"];
+      const serious = sset.includes(r.outcome); const seriousness = serious ? "serious" : "non-serious";
+      let deadline; if (r.outcome === "death" || r.outcome === "life-threatening") deadline = 7; else if (serious) deadline = 15; else deadline = 90;
+      const conf = { Certain: 96, Probable: 82, Possible: 58, Conditional: 40, Unlikely: 24, Unassessable: 15 }[causality] || 50;
+      return { causality, reason, seriousness, serious, deadline, conf };
+    }
+    const C = { Certain: "#04996B", Probable: "#04996B", Possible: "#C8841C", Conditional: "#C8841C", Unlikely: "#C8453B", Unassessable: "#5A6660" };
+    function render(o) {
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('resIdx').textContent = 'ASSESSED';
+      document.getElementById('verdict').classList.add('show');
+      document.getElementById('catLabel').textContent = o.causality;
+      document.getElementById('catLabel').style.color = C[o.causality] || 'var(--ink)';
+      document.getElementById('reasonText').textContent = o.reason;
+      const circ = 351.8, arc = document.getElementById('gaugeArc');
+      arc.style.transition = 'stroke-dashoffset 1s cubic-bezier(.2,.7,.2,1)';
+      arc.style.stroke = (o.causality === 'Possible' || o.causality === 'Conditional') ? '#C8841C' : (o.causality === 'Unlikely' || o.causality === 'Unassessable') ? '#C8453B' : 'url(#g)';
+      requestAnimationFrame(() => { arc.style.strokeDashoffset = circ - (circ * o.conf / 100); });
+      let n = 0; const num = document.getElementById('gaugeNum'); clearInterval(window._t);
+      window._t = setInterval(() => { n += Math.ceil(o.conf / 24); if (n >= o.conf) { n = o.conf; clearInterval(window._t); } num.textContent = n; }, 26);
+      const sp = document.getElementById('pillSerious'); document.getElementById('seriousVal').textContent = o.seriousness; sp.className = 'pill ' + (o.serious ? 'is-serious' : 'is-green');
+      document.getElementById('pillDeadline').className = 'pill is-green'; document.getElementById('deadlineVal').textContent = o.deadline === 90 ? "90 days" : o.deadline + " days";
+      const rb = document.getElementById('routeBox');
+      if (o.serious) { rb.className = 'route expedite'; document.getElementById('routeTitle').textContent = 'Expedited Escalation'; document.getElementById('routeSub').textContent = '— serious case interrupts the normal flow and routes to the urgent path.'; }
+      else { rb.className = 'route normal'; document.getElementById('routeTitle').textContent = 'Standard pathway'; document.getElementById('routeSub').textContent = '— non-serious case proceeds through the normal review flow.'; }
+    }
+    document.getElementById('assessBtn').addEventListener('click', () => {
+      render(assess({
+        suspectDrug: document.getElementById('drug').value,
+        adverseEvent: document.getElementById('event').value,
+        onsetDaysAfterDrug: parseInt(document.getElementById('onset').value || 0, 10),
+        dechallenge: document.getElementById('dechallenge').dataset.val,
+        rechallenge: document.getElementById('rechallenge').dataset.val,
+        alternativeCause: document.getElementById('altcause').dataset.val === 'yes',
+        outcome: document.getElementById('outcome').value
+      }));
+    });
+  </script>
+</body>
+
+</html>

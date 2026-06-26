@@ -1,0 +1,9 @@
+{
+  "suspectDrug": "Abacavir",
+  "adverseEvent": "Drug Reaction with Eosinophilia and Systemic Symptoms (DRESS)",
+  "onsetDaysAfterDrug": 21,
+  "dechallenge": "positive",
+  "rechallenge": "none",
+  "alternativeCause": false,
+  "outcome": "hospitalization"
+}
