@@ -18,6 +18,17 @@ Not a chatbot. The orchestration layer that makes drug safety auditable, account
 
 ---
 
+## Links
+
+| Resource | Link |
+|----------|------|
+| **Live App (Frontend)** | https://vigil-roan-ten.vercel.app |
+| **UiPath Maestro Solution (Labs)** | [Open in Studio Web](https://staging.uipath.com/hackathon26_1017/studio_/designer/1ce3c2ce-5ff0-45d4-a59d-2decf43820a1?solutionId=9df2fc82-e2a8-43c3-6641-08ded39497a3&fileId=9d65ff3b-4cf7-47b0-b868-9ddb69850995&solutionFeedId=all) |
+| **GitHub Repository** | https://github.com/0xkinno/vigil |
+| **Demo Video** | _add link_ |
+
+---
+
 ## 1. Table of Contents
 
 1. [Table of Contents](#1-table-of-contents)
