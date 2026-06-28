@@ -318,7 +318,7 @@ VIGIL earns the coding-agent bonus by building the causality service through a c
 | **The blend** | The coded service outputs `seriousness` and `reportingDeadlineDays` that drive VIGIL's low-code exception routing and SLA — coded + low-code solving the problem together |
 
 Full evidence (install output, session screenshots, exact prompt log) lives in
-[`docs/coding-agent/`](docs/coding-agent/).
+[`docs/coding-agent/`](https://github.com/0xkinno/vigil/tree/main/vigil-causality-service).
 
 ---
 
