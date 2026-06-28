@@ -150,9 +150,9 @@ VIGIL is built on Maestro Case because the domain *is* a case-management problem
    ╚═════════════════════════════════════════════════════════════════════════════╝
 ```
 
-> **Visual flow (Excalidraw):** A hand-drawn case-flow diagram of the Maestro plan is included at
-> [`docs/diagrams/vigil-case-flow.excalidraw.png`](docs/diagrams/vigil-case-flow.excalidraw.png).
-> *(Export your Excalidraw board to PNG and drop it at that path before submission.)*
+> **Visual flow (Excalidraw):** A hand-drawn case-flow diagram of the Maestro plan is included below:
+<img width="3200" height="1800" alt="vigil-case-flow" src="https://github.com/user-attachments/assets/b8674603-77ce-46fc-954a-82ba1e007c04" />
+
 
 ---
 
