@@ -43,14 +43,15 @@ Not a chatbot. The orchestration layer that makes drug safety auditable, account
 10. [The Exception Path](#10-the-exception-path)
 11. [Coded + Low-Code: The Causality Service](#11-coded--low-code-the-causality-service)
 12. [Coding Agent Bonus — Evidence](#12-coding-agent-bonus--evidence)
-13. [UiPath Components Used](#13-uipath-components-used)
-14. [Data Contracts](#14-data-contracts)
-15. [Running the Causality Service](#15-running-the-causality-service)
-16. [Repository Structure](#16-repository-structure)
-17. [Business Relevance](#17-business-relevance)
-18. [Why VIGIL Wins](#18-why-vigil-wins)
-19. [Roadmap](#19-roadmap)
-20. [Tech Stack](#20-tech-stack)
+13. [Setup & Running for Judges](#13-setup-&-running-for-judges)
+14. [UiPath Components Used](#14-uipath-components-used)
+15. [Data Contracts](#15-data-contracts)
+16. [Running the Causality Service](#16-running-the-causality-service)
+17. [Repository Structure](#17-repository-structure)
+18. [Business Relevance](#18-business-relevance)
+19. [Why VIGIL Wins](#19-why-vigil-wins)
+20. [Roadmap](#20-roadmap)
+21. [Tech Stack](#21-tech-stack)
 
 ---
 
@@ -322,7 +323,66 @@ Full evidence (install output, session screenshots, exact prompt log) lives in
 
 ---
 
-## 13. UiPath Components Used
+## 13. Setup & Running for Judges
+
+VIGIL has two parts: the **Maestro Case** (the main solution, in UiPath) and the
+**coded causality service** (Python). Judges can review either independently.
+
+### A. Open and run the Maestro Case (primary solution)
+
+The solution is deployed and shared in the hackathon Labs tenant.
+
+i. **Open the live solution** in UiPath Studio Web:
+   [Open VIGIL in Studio Web](https://staging.uipath.com/hackathon26_1017/studio_/designer/1ce3c2ce-5ff0-45d4-a59d-2decf43820a1?solutionId=9df2fc82-e2a8-43c3-6641-08ded39497a3&fileId=9d65ff3b-4cf7-47b0-b868-9ddb69850995&solutionFeedId=all)
+   *(Access is shared to Everyone in the hackathon tenant. A UiPath account in the
+   `hackathon26_1017` tenant is required to view, as the platform gates on sign-in.)*
+
+ii. **Inspect the case plan** — the five stages (Intake → Triage → Medical Review →
+   Reporting → Closure), the SLA clock and escalation rules, and the secondary
+   interrupting *Expedited Escalation* stage.
+
+iii. **Run the case:** click **Run / Debug** in Studio Web, or start a job from
+   **Orchestrator → Solutions → Maestro Case → Start job** using the sample report
+   JSON below as input.
+
+iv. **Approve the human gate:** when the case reaches **Medical Review**, open
+   **Orchestrator → Actions** (Action Center), assign the task to yourself, and
+   **Approve** the physician review. The case then continues to Reporting and Closure.
+
+v. **Observe completion:** watch the run finish in **Automations → Jobs**, with every
+   agent completing and the case closing with its audit record.
+
+**Sample input (paste as the case input):**
+```json
+{
+  "reportText": "Patient hospitalized with severe skin rash, fever, and facial swelling after starting Abacavir 21 days ago. Reported by physician.",
+  "reporterType": "healthcare_professional"
+}
+```
+
+### B. Run the coded causality service (optional, standalone)
+
+**Requirements:** Python 3.10+ (standard library only — no dependencies).
+
+```bash
+git clone https://github.com/0xkinno/vigil
+cd vigil/causality-service
+
+# Run on the bundled sample case
+python causality_service.py sample_input.json
+
+# Run the built-in self-test suite
+python causality_service.py --self-test   # → 10/10 passed
+```
+
+### C. View the frontend (optional)
+
+Live: https://vigil-roan-ten.vercel.app — enter an adverse event and see the
+causality, seriousness, deadline, and routing decision computed live.
+
+---
+
+## 14. UiPath Components Used
 
 | Component | Use in VIGIL |
 |---|---|
@@ -339,7 +399,7 @@ Full evidence (install output, session screenshots, exact prompt log) lives in
 
 ---
 
-## 14. Data Contracts
+## 15. Data Contracts
 
 **Causality service input:**
 
@@ -390,7 +450,7 @@ Full evidence (install output, session screenshots, exact prompt log) lives in
 
 ---
 
-## 15. Running the Causality Service
+## 16. Running the Causality Service
 
 **Requirements:** Python 3.10+ (standard library only — no external dependencies).
 
@@ -412,7 +472,7 @@ The service is intentionally dependency-free and deterministic, so any reviewer 
 
 ---
 
-## 16. Repository Structure
+## 17. Repository Structure
 
 ```
 vigil/
@@ -439,7 +499,7 @@ vigil/
 
 ---
 
-## 17. Business Relevance
+## 18. Business Relevance
 
 Pharmacovigilance is a **regulatory obligation for every pharmaceutical company on earth** — and a function where a missed deadline is a reportable failure.
 
@@ -455,7 +515,7 @@ The cost of the status quo is not labor — it is **risk**: missed windows, unve
 
 ---
 
-## 18. Why VIGIL Excels
+## 19. Why VIGIL Excels
 
 | Criterion | How VIGIL addresses it |
 |---|---|
@@ -469,7 +529,7 @@ The cost of the status quo is not labor — it is **risk**: missed windows, unve
 
 ---
 
-## 19. Roadmap
+## 20. Roadmap
 
 1. **Restore serious-only gating in-platform** — bind the exception entry rule to the causality service's `seriousness` output via a coded-agent call, so the interrupt fires only on genuinely serious cases
 2. **Multi-regulator child-case swarm** — spawn a child case per regulator (FDA, EMA, PMDA…), each with its own jurisdiction-specific deadline and submission format
@@ -479,7 +539,7 @@ The cost of the status quo is not labor — it is **risk**: missed windows, unve
 
 ---
 
-## 20. Tech Stack
+## 21. Tech Stack
 
 | Layer | Technology |
 |---|---|
