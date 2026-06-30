@@ -49,7 +49,7 @@ Not a chatbot. The orchestration layer that makes drug safety auditable, account
 16. [Running the Causality Service](#16-running-the-causality-service)
 17. [Repository Structure](#17-repository-structure)
 18. [Business Relevance](#18-business-relevance)
-19. [Why VIGIL Wins](#19-why-vigil-wins)
+19. [Why VIGIL Excels](#19-why-vigil-excels)
 20. [Roadmap](#20-roadmap)
 21. [Tech Stack](#21-tech-stack)
 
